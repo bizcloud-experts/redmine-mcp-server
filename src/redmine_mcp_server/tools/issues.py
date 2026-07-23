@@ -17,6 +17,7 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         status_id: str | None = None,
         assigned_to_id: int | None = None,
         tracker_id: int | None = None,
+        fixed_version_id: int | None = None,
         sort: str | None = None,
         offset: int = 0,
         limit: int = 25,
@@ -31,6 +32,8 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
             params["assigned_to_id"] = assigned_to_id
         if tracker_id is not None:
             params["tracker_id"] = tracker_id
+        if fixed_version_id is not None:
+            params["fixed_version_id"] = fixed_version_id
         if sort is not None:
             params["sort"] = sort
 
