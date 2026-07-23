@@ -155,6 +155,8 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         custom_fields: list[dict] | None = None,
         is_private: bool | None = None,
         estimated_hours: float | None = None,
+        start_date: str | None = None,
+        due_date: str | None = None,
         notes: str | None = None,
         private_notes: bool | None = None,
     ) -> dict:
@@ -178,6 +180,8 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
             "custom_fields": custom_fields,
             "is_private": is_private,
             "estimated_hours": estimated_hours,
+            "start_date": start_date,
+            "due_date": due_date,
             "notes": notes,
             "private_notes": private_notes,
         }
