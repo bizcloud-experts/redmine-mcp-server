@@ -18,11 +18,27 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         assigned_to_id: int | None = None,
         tracker_id: int | None = None,
         fixed_version_id: int | None = None,
+        issue_ids: str | None = None,
         sort: str | None = None,
         offset: int = 0,
-        limit: int = 25,
+        limit: int = 100,
+        fetch_all: bool = False,
     ) -> dict:
-        """List issues with optional filters and pagination."""
+        """List issues with optional filters and pagination.
+
+        Args:
+            project_id: Filter by project ID.
+            status_id: Filter by status (e.g. "open", "closed", "*", or a numeric ID).
+            assigned_to_id: Filter by assignee user ID.
+            tracker_id: Filter by tracker ID.
+            fixed_version_id: Filter by target version ID.
+            issue_ids: Comma-separated list of issue IDs to fetch (e.g. "1,2,3").
+            sort: Sort field and direction (e.g. "updated_on:desc").
+            offset: Pagination offset (ignored when fetch_all=True).
+            limit: Maximum number of results per page (max 100).
+            fetch_all: If True, automatically paginates and returns all matching
+                issues in a single response.
+        """
         params: dict = {}
         if project_id is not None:
             params["project_id"] = project_id
@@ -34,11 +50,43 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
             params["tracker_id"] = tracker_id
         if fixed_version_id is not None:
             params["fixed_version_id"] = fixed_version_id
+        if issue_ids is not None:
+            params["issue_id"] = issue_ids
         if sort is not None:
             params["sort"] = sort
 
+        page_limit = min(limit, 100)
+
+        if fetch_all:
+            all_issues: list[dict] = []
+            current_offset = 0
+
+            while True:
+                params["offset"] = current_offset
+                params["limit"] = page_limit
+
+                try:
+                    data = await client.get("/issues.json", params=params)
+                except RedmineError as e:
+                    return e.to_dict()
+
+                issues = data.get("issues", [])
+                all_issues.extend(issues)
+
+                total_count = data.get("total_count", 0)
+                current_offset += len(issues)
+
+                if not issues or current_offset >= total_count:
+                    break
+
+            return {
+                "total_count": len(all_issues),
+                "issues": all_issues,
+            }
+
+        # Standard single-page request
         params["offset"] = offset
-        params["limit"] = min(limit, 100)
+        params["limit"] = page_limit
 
         try:
             data = await client.get("/issues.json", params=params)
@@ -48,7 +96,7 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         return {
             "total_count": data.get("total_count", 0),
             "offset": data.get("offset", offset),
-            "limit": data.get("limit", params["limit"]),
+            "limit": data.get("limit", page_limit),
             "issues": data.get("issues", []),
         }
 

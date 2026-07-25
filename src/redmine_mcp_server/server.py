@@ -13,6 +13,7 @@ from .config import load_config
 from .tools.issues import register_issue_tools
 from .tools.projects import register_project_tools
 from .tools.search import register_search_tools
+from .tools.time_entries import register_time_entry_tools
 
 # Validate configuration at import time (fail fast)
 config = load_config()
@@ -27,6 +28,7 @@ client = RedmineClient(base_url=config["redmine_url"], api_key=config["redmine_a
 register_issue_tools(mcp, client)
 register_project_tools(mcp, client)
 register_search_tools(mcp, client)
+register_time_entry_tools(mcp, client)
 
 
 def main() -> None:
