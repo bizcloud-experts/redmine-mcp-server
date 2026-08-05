@@ -45,7 +45,7 @@ Create or edit `~/.kiro/settings/mcp.json` (this makes it available across all y
   "mcpServers": {
     "redmine": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/suryamalempati/redmine-mcp-server.git", "redmine-mcp-server"],
+      "args": ["--from", "git+https://github.com/bizcloud-experts/redmine-mcp-server.git", "redmine-mcp-server"],
       "env": {
         "REDMINE_URL": "https://your-redmine-instance.com",
         "REDMINE_API_KEY": "your-api-key-here"
