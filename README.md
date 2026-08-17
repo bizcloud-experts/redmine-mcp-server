@@ -66,12 +66,32 @@ You can also place this in `.kiro/settings/mcp.json` within a specific workspace
 
 The MCP server will start automatically when Kiro launches. You can verify it's working by asking: "List my Redmine projects."
 
+### Alternative: If git is not installed
+
+If you get a "Git executable not found" error, you can use a zip-based install that doesn't require git on your machine:
+
+```json
+{
+  "mcpServers": {
+    "redmine": {
+      "command": "uvx",
+      "args": ["--from", "redmine-mcp-server @ https://github.com/bizcloud-experts/redmine-mcp-server/archive/refs/heads/main.zip", "redmine-mcp-server"],
+      "env": {
+        "REDMINE_URL": "https://your-redmine-instance.com",
+        "REDMINE_API_KEY": "your-api-key-here"
+      },
+      "disabled": false
+    }
+  }
+}
+```
+
 ## Alternative setup: Local install
 
 If you prefer to run from a local clone instead of `uvx`:
 
 ```bash
-git clone https://github.com/suryamalempati/redmine-mcp-server.git
+git clone https://github.com/bizcloud-experts/redmine-mcp-server.git
 cd redmine-mcp-server
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
@@ -105,11 +125,12 @@ Then use this MCP config instead:
 | "Authentication failed: invalid or expired API key" | Verify your API key is correct in Redmine → My Account → API access key |
 | "Connection failed" | Check that the `REDMINE_URL` is reachable from your machine |
 | Tools not appearing in Kiro | Confirm the `mcp.json` file is in the right location and `"disabled"` is `false` |
+| "Git executable not found" | Git is not installed or not on PATH. Use the [zip-based install](#alternative-if-git-is-not-installed) instead, or install git and restart your terminal |
 
 ## Development
 
 ```bash
-git clone https://github.com/suryamalempati/redmine-mcp-server.git
+git clone https://github.com/bizcloud-experts/redmine-mcp-server.git
 cd redmine-mcp-server
 python -m venv .venv
 source .venv/bin/activate
