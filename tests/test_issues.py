@@ -173,6 +173,31 @@ class TestCreateIssue:
         assert "error" in result
         assert result["status_code"] == 422
 
+    @respx.mock
+    async def test_done_ratio_included_in_body(self, call_tool):
+        import json
+
+        route = respx.post("http://redmine.example.com/issues.json").mock(
+            return_value=httpx.Response(201, json={"issue": {"id": 1}})
+        )
+        await call_tool("create_issue", project_id=1, subject="Test", done_ratio=50)
+        body = json.loads(route.calls[0].request.content)
+        assert body["issue"]["done_ratio"] == 50
+
+    async def test_rejects_done_ratio_above_100(self, call_tool):
+        result = await call_tool(
+            "create_issue", project_id=1, subject="Test", done_ratio=150
+        )
+        assert "error" in result
+        assert "done_ratio" in result["error"]
+
+    async def test_rejects_negative_done_ratio(self, call_tool):
+        result = await call_tool(
+            "create_issue", project_id=1, subject="Test", done_ratio=-10
+        )
+        assert "error" in result
+        assert "done_ratio" in result["error"]
+
 
 class TestUpdateIssue:
     @respx.mock
@@ -198,6 +223,38 @@ class TestUpdateIssue:
     async def test_rejects_invalid_id(self, call_tool):
         result = await call_tool("update_issue", issue_id=-5)
         assert "error" in result
+
+    @respx.mock
+    async def test_done_ratio_included_in_body(self, call_tool):
+        import json
+
+        route = respx.put("http://redmine.example.com/issues/1.json").mock(
+            return_value=httpx.Response(204)
+        )
+        await call_tool("update_issue", issue_id=1, done_ratio=75)
+        body = json.loads(route.calls[0].request.content)
+        assert body["issue"]["done_ratio"] == 75
+
+    @respx.mock
+    async def test_done_ratio_zero_included_in_body(self, call_tool):
+        import json
+
+        route = respx.put("http://redmine.example.com/issues/1.json").mock(
+            return_value=httpx.Response(204)
+        )
+        await call_tool("update_issue", issue_id=1, done_ratio=0)
+        body = json.loads(route.calls[0].request.content)
+        assert body["issue"]["done_ratio"] == 0
+
+    async def test_rejects_done_ratio_above_100(self, call_tool):
+        result = await call_tool("update_issue", issue_id=1, done_ratio=101)
+        assert "error" in result
+        assert "done_ratio" in result["error"]
+
+    async def test_rejects_negative_done_ratio(self, call_tool):
+        result = await call_tool("update_issue", issue_id=1, done_ratio=-1)
+        assert "error" in result
+        assert "done_ratio" in result["error"]
 
 
 class TestDeleteIssue:

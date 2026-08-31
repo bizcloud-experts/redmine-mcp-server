@@ -154,10 +154,25 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         watcher_user_ids: list[int] | None = None,
         is_private: bool | None = None,
         estimated_hours: float | None = None,
+        done_ratio: int | None = None,
     ) -> dict:
-        """Create a new issue in a project."""
+        """Create a new issue in a project.
+
+        Args:
+            done_ratio: Percentage of completion (integer 0-100).
+        """
         if not subject or not subject.strip():
             return {"error": "subject is required and cannot be empty", "details": []}
+
+        if done_ratio is not None and (
+            not isinstance(done_ratio, int)
+            or isinstance(done_ratio, bool)
+            or not 0 <= done_ratio <= 100
+        ):
+            return {
+                "error": "done_ratio must be an integer between 0 and 100",
+                "details": [],
+            }
 
         issue_data: dict = {
             "project_id": project_id,
@@ -177,6 +192,7 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
             "watcher_user_ids": watcher_user_ids,
             "is_private": is_private,
             "estimated_hours": estimated_hours,
+            "done_ratio": done_ratio,
         }
 
         for key, value in optional_fields.items():
@@ -210,10 +226,25 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
         due_date: str | None = None,
         notes: str | None = None,
         private_notes: bool | None = None,
+        done_ratio: int | None = None,
     ) -> dict:
-        """Update an existing issue."""
+        """Update an existing issue.
+
+        Args:
+            done_ratio: Percentage of completion (integer 0-100).
+        """
         if not isinstance(issue_id, int) or issue_id <= 0:
             return {"error": "issue_id must be a positive integer", "details": []}
+
+        if done_ratio is not None and (
+            not isinstance(done_ratio, int)
+            or isinstance(done_ratio, bool)
+            or not 0 <= done_ratio <= 100
+        ):
+            return {
+                "error": "done_ratio must be an integer between 0 and 100",
+                "details": [],
+            }
 
         issue_data: dict = {}
 
@@ -235,6 +266,7 @@ def register_issue_tools(mcp: FastMCP, client: RedmineClient) -> None:
             "due_date": due_date,
             "notes": notes,
             "private_notes": private_notes,
+            "done_ratio": done_ratio,
         }
 
         for key, value in optional_fields.items():
